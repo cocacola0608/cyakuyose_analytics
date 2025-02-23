@@ -27,4 +27,8 @@ Homestead.json
 .env.backup
 .env.production
 .phpactor.json
+<<<<<<< HEAD
 auth.json
+=======
+auth.json
+>>>>>>> 30b3847469aa6438b5ada0ba7599f159145ab94d
