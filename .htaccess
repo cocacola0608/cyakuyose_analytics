@@ -1,0 +1,8 @@
+# 常時SSL化
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# publicディレクトリへのリダイレクトを修正（無限リダイレクト防止）
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ public/$1 [QSA,L]
