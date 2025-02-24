@@ -9,6 +9,7 @@ class ContractController extends Controller
 {
     public function index()
     {
+        /*
         try {
             // テーブル一覧を取得
             $tables = DB::connection('plus_db')
@@ -26,5 +27,7 @@ class ContractController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+        */
+        return view('welcome');
     }
 } 

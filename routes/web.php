@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ContractController;
+use App\Http\Controllers\WelcomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,4 +14,10 @@ use App\Http\Controllers\ContractController;
 |
 */
 
-Route::get('/', [ContractController::class, 'index']);
+// トップページ
+Route::get('/', [WelcomeController::class, 'index']);
+
+// ホームページ
+Route::get('/home', function () {
+    return view('home');
+});
