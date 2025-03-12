@@ -99,6 +99,13 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+
+        'batch' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/batch.log'),
+            'level' => 'debug',
+            'days' => 14,
+        ],
     ],
 
 ];
