@@ -38,8 +38,9 @@ class InsertDataCommand extends Command
             foreach ($aggregatedData as $data) {
                 DB::connection('mysql')->table('monthly_statistics')->insert([
                     //現在日時の先月の月をセット
-                    'month' => now()->subMonth()->format('Y-m-01'),
+                    'yearmonth' => now()->format('Ym'),
                     'contract_count' => $data->contract_count,
+                    'type' => 'plus',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
