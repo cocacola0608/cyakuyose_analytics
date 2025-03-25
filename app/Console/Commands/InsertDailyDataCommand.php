@@ -6,26 +6,28 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class InsertDataCommand extends Command
+class InsertDailyDataCommand extends Command
 {
-    protected $signature = 'data:insert';
-    protected $description = 'Count data from plus_db and insert to analytics db';
+    protected $signature = 'data:insert-daily';
+    protected $description = 'Count daily data from plus_db and basic_db and insert to analytics db';
 
     public function handle()
     {
         //キャクヨセplus
         try {
-            Log::channel('batch')->info('Batch Monthly キャクヨセplus started');
+            Log::channel('batch')->info('Batch Daily キャクヨセplus started');
 
-            // plus_dbから月次データを集計
+            // plus_dbから日次データを集計
+            //SELECT count(*) FROM `memberShip` LEFT JOIN `contract` ON `memberShip`.`contractId` = `contract`.`contractId` WHERE `contract`.`contract` = 1 AND `demo` IS NULL;
             $aggregatedData = DB::connection('plus_db')
-                ->table('contract')
+                ->table('memberShip')
+                ->leftJoin('contract', 'memberShip.contractId', '=', 'contract.contractId')
                 ->select(
                     DB::raw('COUNT(*) as contract_count')
-                    // 必要に応じて他の集計項目を追加
                 )
                 ->whereNull('demo')
                 ->where('contract', 1)
+                ->whereDate('created_at', now()->subDay()->format('Y-m-d'))
                 ->get();
 
             if ($aggregatedData->isEmpty()) {
@@ -33,13 +35,12 @@ class InsertDataCommand extends Command
                 return;
             }
 
-            // monthly_statisticsテーブルへの挿入処理
+            // daily_statisticsテーブルへの挿入処理
             DB::beginTransaction();
 
             foreach ($aggregatedData as $data) {
-                DB::connection('mysql')->table('monthly_statistics')->insert([
-                    //現在日時の先月の月をセット
-                    'yearmonth' => now()->format('Ym'),
+                DB::connection('mysql')->table('daily_statistics')->insert([
+                    'date' => now()->subDay()->format('Ymd'),
                     'contract_count' => $data->contract_count,
                     'type' => 'plus',
                     'created_at' => now(),
@@ -49,7 +50,7 @@ class InsertDataCommand extends Command
 
             DB::commit();
 
-            Log::channel('batch')->info('Monthly statistics insertion completed', [
+            Log::channel('batch')->info('Daily statistics insertion completed', [
                 'count' => $aggregatedData->count()
             ]);
 
@@ -62,17 +63,19 @@ class InsertDataCommand extends Command
 
         //キャクヨセ
         try {
-            Log::channel('batch')->info('Batch Monthly キャクヨセ started');
+            Log::channel('batch')->info('Batch Daily キャクヨセ started');
 
-            // plus_dbから月次データを集計
+            // basic_dbから日次データを集計
+            //SELECT count(*) FROM `memberShip` LEFT JOIN `contract` ON `memberShip`.`contractId` = `contract`.`contractId` WHERE `contract`.`contract` = 1 AND `demo` IS NULL;
             $aggregatedData = DB::connection('basic_db')
-                ->table('contract')
+                ->table('memberShip')
+                ->leftJoin('contract', 'memberShip.contractId', '=', 'contract.contractId')
                 ->select(
                     DB::raw('COUNT(*) as contract_count')
-                    // 必要に応じて他の集計項目を追加
                 )
                 ->whereNull('demo')
                 ->where('contract', 1)
+                ->whereDate('created_at', now()->subDay()->format('Y-m-d'))
                 ->get();
 
             if ($aggregatedData->isEmpty()) {
@@ -80,13 +83,12 @@ class InsertDataCommand extends Command
                 return;
             }
 
-            // monthly_statisticsテーブルへの挿入処理
+            // daily_statisticsテーブルへの挿入処理
             DB::beginTransaction();
 
             foreach ($aggregatedData as $data) {
-                DB::connection('mysql')->table('monthly_statistics')->insert([
-                    //現在日時の先月の月をセット
-                    'yearmonth' => now()->format('Ym'),
+                DB::connection('mysql')->table('daily_statistics')->insert([
+                    'date' => now()->subDay()->format('Ymd'),
                     'contract_count' => $data->contract_count,
                     'type' => 'basic',
                     'created_at' => now(),
@@ -96,7 +98,7 @@ class InsertDataCommand extends Command
 
             DB::commit();
 
-            Log::channel('batch')->info('Monthly statistics insertion completed', [
+            Log::channel('batch')->info('Daily statistics insertion completed', [
                 'count' => $aggregatedData->count()
             ]);
 
