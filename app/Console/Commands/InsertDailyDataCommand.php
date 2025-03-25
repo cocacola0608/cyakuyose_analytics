@@ -27,7 +27,6 @@ class InsertDailyDataCommand extends Command
                 )
                 ->whereNull('demo')
                 ->where('contract', 1)
-                ->whereDate('created_at', now()->subDay()->format('Y-m-d'))
                 ->get();
 
             if ($aggregatedData->isEmpty()) {
@@ -75,7 +74,6 @@ class InsertDailyDataCommand extends Command
                 )
                 ->whereNull('demo')
                 ->where('contract', 1)
-                ->whereDate('created_at', now()->subDay()->format('Y-m-d'))
                 ->get();
 
             if ($aggregatedData->isEmpty()) {
