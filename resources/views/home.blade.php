@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'ホームページ')
-
 @section('content')
-    <h1>ようこそ</h1>
-    <p>ここに個別のコンテンツが入ります</p>
-@endsection 
+<div class="container">
+    <h1>ダッシュボード</h1>
+    <daily-statistics-chart></daily-statistics-chart>
+</div>
+@endsection
