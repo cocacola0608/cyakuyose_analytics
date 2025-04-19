@@ -10,7 +10,7 @@ class DailyStatisticsController extends Controller
     public function index()
     {
         $data = DB::table('daily_statistics')
-            ->select('date', 'contract_count')
+            ->select('date', 'contract_count', 'type')
             ->orderBy('date', 'asc')
             ->get();
 

@@ -1,55 +1,83 @@
 <template>
   <div>
     <h2>日別契約数チャート</h2>
-    <Bar :chart-data="chartData" :options="chartOptions" />
+    <Line :data="data"  />
   </div>
 </template>
 
 <script>
-import { Bar } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js'
+import { Line } from 'vue-chartjs'
+import Axios from 'axios'
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+)
 
 export default {
   components: {
-    Bar,
+    Line
   },
   data() {
     return {
-      chartData: {
-        labels: [], // 日付ラベル
+      data: {
+        labels: [],
         datasets: [
           {
-            label: '契約数',
-            backgroundColor: '#42A5F5',
-            data: [], // 契約数データ
+            label: 'キャクヨセ',
+            backgroundColor: '#f87979',
+            data: []
           },
-        ],
-      },
-      chartOptions: {
-        responsive: true,
-        maintainAspectRatio: false,
-      },
-    };
-  },
-  mounted() {
-    this.fetchDailyStatistics();
-  },
-  methods: {
-    async fetchDailyStatistics() {
-      try {
-        const response = await axios.get('/api/daily-statistics');
-        const data = response.data;
-
-        this.chartData.labels = data.map(item => item.date);
-        this.chartData.datasets[0].data = data.map(item => item.contract_count);
-      } catch (error) {
-        console.error('Error fetching daily statistics:', error);
+          {
+            label: 'キャクヨセplus',
+            backgroundColor: '#aaaaaa',
+            data: []
+          }
+        ]
       }
-    },
+   }
   },
-};
+  mounted () {
+    const self = this
+    Axios.get('/api/daily-statistics')
+    .then((response) => {
+      if (response && response.data.length > 0) {
+        var countBasic = 0;
+        var countPlus = 0;
+        for (let i = 0; i < response.data.length; i++) {
+          if (response.data[i]["type"] == "basic") {
+            self.data.datasets[0].data[countBasic] = response.data[i]["contract_count"];
+            self.data.labels[countBasic] = response.data[i]["date"];
+            countBasic++;
+          } else {
+            self.data.datasets[1].data[countPlus] = response.data[i]["contract_count"];
+            countPlus++;
+          }
+        }
+      } else {
+        self.data.labels = [];
+        self.data.datasets[0].data = [];
+        self.data.datasets[1].data = [];
+      }
+    })
+  }
+}
+
 </script>
 
 <style scoped>
