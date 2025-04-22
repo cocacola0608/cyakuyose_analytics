@@ -1,89 +1,108 @@
 <template>
-  <div>
-    <h2>日別契約数チャート</h2>
-    <Line :data="data"  />
+  <div style="
+        width: 90%;
+        max-width: 1000px;
+        margin: auto;
+    ">
+    <h1 style="text-align: center;font-size: 24px;">キャクヨセ日別総友だち数グラフ</h1>
+    <div id="app">
+      <canvas id="myChart"></canvas>
+      <canvas id="myPlusChart"></canvas>
+    </div>
+    <div class="memo">
+      \そのほか情報はブログに記載しております/<br>
+      <a href="https://cyakuyose.com/">https://cyakuyose.com/</a><br>
+      LINEでのお問い合わせも受付中！<br>
+      <a href="https://lin.ee/Hasj0DR"><img src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png" alt="友だち追加" height="36" border="0"></a>
+    </div>
   </div>
 </template>
 
 <script>
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-} from 'chart.js'
-import { Line } from 'vue-chartjs'
-import Axios from 'axios'
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-)
-
+import axios from 'axios'
+import Chart from 'chart.js/auto';
 export default {
-  components: {
-    Line
-  },
   data() {
     return {
-      data: {
-        labels: [],
-        datasets: [
-          {
-            label: 'キャクヨセ',
-            backgroundColor: '#f87979',
-            data: []
-          },
-          {
-            label: 'キャクヨセplus',
-            backgroundColor: '#aaaaaa',
-            data: []
-          }
-        ]
-      }
-   }
+      labels: [],
+      data: [],
+      labelsPlus: [],
+      dataPlus: [],
+    };
   },
-  mounted () {
-    const self = this
-    Axios.get('/api/daily-statistics')
-    .then((response) => {
-      if (response && response.data.length > 0) {
-        var countBasic = 0;
-        var countPlus = 0;
-        for (let i = 0; i < response.data.length; i++) {
-          if (response.data[i]["type"] == "basic") {
-            self.data.datasets[0].data[countBasic] = response.data[i]["contract_count"];
-            self.data.labels[countBasic] = response.data[i]["date"];
-            countBasic++;
-          } else {
-            self.data.datasets[1].data[countPlus] = response.data[i]["contract_count"];
-            countPlus++;
-          }
-        }
-      } else {
-        self.data.labels = [];
-        self.data.datasets[0].data = [];
-        self.data.datasets[1].data = [];
-      }
-    })
+  methods: {
+    displayGraph() {
+      const ctx = document.getElementById('myChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: this.labels,
+          datasets: [
+            {
+              label: 'キャクヨセ',
+              data: this.data,
+              borderColor: "#8EC21F",
+            },
+          ],
+        },
+      });
+    },
+    displayPlusGraph() {
+      const ctxPlus = document.getElementById('myPlusChart').getContext('2d');
+      new Chart(ctxPlus, {
+        type: 'line',
+        data: {
+          labels: this.labelsPlus,
+          datasets: [
+            {
+              label: 'キャクヨセplus',
+              data: this.dataPlus,
+              borderColor: "#CBA846",
+            },
+          ],
+        },
+      });
+    },
+  },
+  mounted() {
+    axios.get('/api/daily-statistics').then((response) => {
+      this.data = response.data.map((sale) => sale.number);
+      this.labels = response.data.map((sale) => sale.month);
+
+      this.displayGraph();
+    });
+    axios.get('/api/daily-plus-statistics').then((response) => {
+      this.dataPlus = response.data.map((sale) => sale.number);
+      this.labelsPlus = response.data.map((sale) => sale.month);
+
+      this.displayPlusGraph();
+    });
   }
 }
 
 </script>
 
-<style scoped>
-.chart-container {
+<style>
+.memo {
   position: relative;
-  height: 40vh;
-  width: 80vw;
+  padding: 1.5rem 1.5rem calc(1.5rem + 10px);
+  border: 2px solid #000;
+  margin-top: 10px;
 }
-</style> 
+
+.memo:after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  content: '';
+  border-top: 2px solid #000;
+  background-image: -webkit-repeating-linear-gradient(135deg, #000, #000 1px, transparent 2px, transparent 5px);
+  background-image: repeating-linear-gradient(-45deg, #000, #000 1px, transparent 2px, transparent 5px);
+  background-size: 7px 7px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+</style>

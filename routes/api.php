@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DailyStatisticsController;
-
+use App\Http\Controllers\DailyPlusStatisticsController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -20,3 +20,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::get('/daily-statistics', [DailyStatisticsController::class, 'index']);
+Route::get('/daily-plus-statistics', [DailyPlusStatisticsController::class, 'index']);

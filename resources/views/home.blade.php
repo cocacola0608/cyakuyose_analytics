@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h1>ダッシュボード</h1>
     <daily-statistics-chart></daily-statistics-chart>
+    <daily-plus-statistics-chart></daily-plus-statistics-chart>
 </div>
 @endsection
